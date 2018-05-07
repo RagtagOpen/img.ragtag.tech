@@ -12,6 +12,11 @@
     return isset($var) ? $var : $default;
   }
 
+  if(get($_ENV['SENTRY_DSN']) && class_exists('Raven_Client')):
+    $client = new Raven_Client(get($_ENV['SENTRY_DSN']));
+    $client->install();
+  endif;
+
   $request_ip = get($_SERVER['HTTP_X_FORWARDED_FOR'], $_SERVER['REMOTE_ADDR']);
   $request_ip = explode(',', $request_ip);
   $request_ip = array_shift($request_ip);

@@ -2,6 +2,7 @@
   "require": {
     "spatie/image-optimizer": "^1.0",
     "gumlet/php-image-resize": "^1.7",
-    "ext-imagick": "*"
+    "ext-imagick": "*",
+    "sentry/sentry": "^1.9"
   }
 }
