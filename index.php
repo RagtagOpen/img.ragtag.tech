@@ -19,8 +19,6 @@
 
   $request_ip_whitelisted = in_array($request_ip, explode(',', get($_ENV['WHITELISTED_IPS'], '')));
 
-  $imagick_webp_support = in_array('WEBP', \Imagick::queryformats());
-
   if(isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN']):
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
   endif;
@@ -32,8 +30,7 @@
     'jpg' => 'image/jpeg',
     'jpeg' => 'image/jpeg',
     'png' => 'image/png',
-    'gif' => 'image/gif',
-    'webp' => 'image/webp'
+    'gif' => 'image/gif'
   );
 
   $formats = array(
@@ -41,12 +38,10 @@
     'JPG' => IMAGETYPE_JPEG,
     'PNG' => IMAGETYPE_PNG,
     'GIF' => IMAGETYPE_GIF,
-    'WEBP' => IMAGETYPE_WEBP,
     'jpeg' => IMAGETYPE_JPEG,
     'jpg' => IMAGETYPE_JPEG,
     'png' => IMAGETYPE_PNG,
-    'gif' => IMAGETYPE_GIF,
-    'webp' => IMAGETYPE_WEBP
+    'gif' => IMAGETYPE_GIF
   );
 
   $partners = json_decode(get($_ENV['PARTNERS'], '{}'), TRUE);
@@ -156,11 +151,6 @@
   else:
     $options->e = filter_var($options->e, FILTER_VALIDATE_BOOLEAN);
   endif;
-  if(!isset($options->webp)):
-    $options->webp = FALSE;
-  else:
-    $options->webp = filter_var($options->webp, FILTER_VALIDATE_BOOLEAN);
-  endif;
   if(!isset($options->w)):
     $options->w = null;
   else:
@@ -177,24 +167,6 @@
       $options->h = intval($options->h);
     } catch (Exception $e) {
       $options->h = null;
-    }
-  endif;
-  if(!isset($options->mw)):
-    $options->mw = null;
-  else:
-    try {
-      $options->mw = intval($options->mw);
-    } catch (Exception $e) {
-      $options->mw = null;
-    }
-  endif;
-  if(!isset($options->mh)):
-    $options->mh = null;
-  else:
-    try {
-      $options->mh = intval($options->mh);
-    } catch (Exception $e) {
-      $options->mh = null;
     }
   endif;
   if(!isset($options->fit)):
@@ -221,14 +193,6 @@
   if(in_array($original_extension, array_keys($formats))):
 
     $image = ImageResize::createFromString($image);
-
-    // if max-width or max-height are set, override the width and height options
-    if($options->mw && $image->getSourceWidth() > $options->mw):
-      $options->w = $options->mw;
-    endif;
-    if($options->mh && $image->getSourceHeight() > $options->mh):
-      $options->h = $options->mh;
-    endif;
 
     if ($options->w && $options->h):
       if($options->fit === 'crop'):
@@ -264,38 +228,11 @@
     $content_type = $image->source_type;
 
     if(get($formats[$options->fm])):
-      if(get($formats[$options->fm]) === IMAGETYPE_WEBP && $imagick_webp_support):
-        if(!in_array($image->source_type, array(IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP))):
-          throw Exception('Unsupported source format for conversion to webp');
-        endif;
-        $image->save(
-          $temp_image
-        );
-        $magick = new Imagick($temp_image);
-        $magick->setImageFormat('WEBP');
-        $magick->setOption('webp:method', '6');
-        $magick->setOption('webp:low-memory', 'true');
-        $magick->setImageCompressionQuality(75);
-        if($image->source_type === IMAGETYPE_PNG):
-          $magick->setOption('webp:lossless', 'true');
-          $magick->setImageAlphaChannel(imagick::ALPHACHANNEL_ACTIVATE);
-          $magick->setBackgroundColor(new ImagickPixel('transparent'));
-        endif;
-        $magick->writeImage($temp_image);
-        $content_type = IMAGETYPE_WEBP;
-      else:
-        $image->save(
-          $temp_image,
-          $formats[$options->fm]
-        );
-        if(get($formats[$options->fm]) === IMAGETYPE_WEBP):
-          if (filesize($temp_image) % 2 == 1):
-            file_put_contents($temp_image, "\0", FILE_APPEND);
-            header('X-WebP-Padded: true');
-          endif;
-        endif;
-        $content_type = get($formats[$options->fm], $image->source_type);
-      endif;
+      $image->save(
+        $temp_image,
+        $formats[$options->fm]
+      );
+      $content_type = get($formats[$options->fm], $image->source_type);
     else:
       $image->save(
         $temp_image
@@ -310,21 +247,6 @@
         return trim($item);
       }
     );
-
-    if(in_array('image/webp', $acceptable) && $imagick_webp_support && in_array($image->source_type, array(IMAGETYPE_PNG, IMAGETYPE_JPEG)) && $options->webp):
-      $magick = new Imagick($temp_image);
-      $magick->setImageFormat('WEBP');
-      $magick->setOption('webp:method', '6');
-      $magick->setOption('webp:low-memory', 'true');
-      $magick->setImageCompressionQuality(50);
-      if($magick->getFormat() === IMAGETYPE_PNG):
-        $magick->setOption('webp:lossless', 'true');
-        $magick->setImageAlphaChannel(imagick::ALPHACHANNEL_ACTIVATE);
-        $magick->setBackgroundColor(new ImagickPixel('transparent'));
-      endif;
-      $magick->writeImage($temp_image);
-      $content_type = IMAGETYPE_WEBP;
-    endif;
 
     header('Content-Type: ' . image_type_to_mime_type($content_type));
 
