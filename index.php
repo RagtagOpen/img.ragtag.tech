@@ -14,7 +14,7 @@
 
   if(get($_ENV['SENTRY_DSN']) && class_exists('Raven_Client')):
     $raven_opts = array();
-    if(get($_ENV['HEROKU_SLUG_COMMIT']):
+    if(get($_ENV['HEROKU_SLUG_COMMIT'])):
       $raven_opts['release'] = get($_ENV['HEROKU_SLUG_COMMIT']);
     endif;
     if(get($_ENV['SENTRY_ENVIRONMENT'])):
