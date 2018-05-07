@@ -113,14 +113,15 @@
     $partner_slug = $default_partner_slug;
   endif;
 
-  header('X-Partners: ' . json_encode($partners));
   if(!isset($partners[$partner_slug])):
+    header('X-404: $partner_slug "' . $partner_slug . '" not found');
     header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
     echo file_get_contents('404.html');
     die();
   endif;
 
   if(count($parts) < 2):
+    header('X-404: count($parts) < 2');
     header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
     echo file_get_contents('404.html');
     die();
@@ -209,6 +210,7 @@
   $temp_image = tempnam('/tmp', 'IMAGE');
 
   if($image === FALSE):
+    header('X-404: source image not found');
     header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
     echo file_get_contents('404.html');
     die();
