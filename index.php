@@ -49,7 +49,7 @@
     'webp' => IMAGETYPE_WEBP
   );
 
-  $partners = json_decode(get($_ENV['PARTNERS'], '{}'));
+  $partners = json_decode(get($_ENV['PARTNERS'], '{}'), TRUE);
 
   $default_partner_slug = get($_ENV['DEFAULT_PARTNER_SLUG'], NULL);
   $parts = array_values(array_filter(explode("/", $_SERVER['REQUEST_URI'])));
