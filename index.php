@@ -121,7 +121,7 @@
   endif;
 
   if(count($parts) < 2):
-    header('X-404: count($parts) < 2');
+    header('X-404: count($parts) < 2 ' . json_encode($parts));
     header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
     echo file_get_contents('404.html');
     die();
