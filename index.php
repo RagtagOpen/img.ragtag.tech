@@ -113,9 +113,9 @@
     $partner_slug = $default_partner_slug;
   endif;
 
+  header('X-Partners: ' . json_encode($partners));
   if(!isset($partners[$partner_slug])):
     header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
-    header('X-Partners: ' . json_encode($partners));
     echo file_get_contents('404.html');
     die();
   endif;
