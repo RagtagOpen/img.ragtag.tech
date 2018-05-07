@@ -13,7 +13,14 @@
   }
 
   if(get($_ENV['SENTRY_DSN']) && class_exists('Raven_Client')):
-    $client = new Raven_Client(get($_ENV['SENTRY_DSN']));
+    $raven_opts = array();
+    if(get($_ENV['HEROKU_SLUG_COMMIT']):
+      $raven_opts['release'] = get($_ENV['HEROKU_SLUG_COMMIT']);
+    endif;
+    if(get($_ENV['SENTRY_ENVIRONMENT'])):
+      $raven_opts['environment'] = get($_ENV['SENTRY_ENVIRONMENT']);
+    endif;
+    $client = new Raven_Client(get($_ENV['SENTRY_DSN']), $raven_opts);
     $client->install();
   endif;
 
