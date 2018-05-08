@@ -8,6 +8,14 @@
   use Gumlet\ImageResize;
   use Spatie\ImageOptimizer\OptimizerChainFactory;
 
+  try {
+    $dotenv = new Dotenv\Dotenv(__DIR__);
+    $dotenv->load();
+  } catch (\Exception $e) {
+    // if this fails, we're in production
+  }
+
+
   function get(&$var, $default=null) {
     return isset($var) ? $var : $default;
   }
