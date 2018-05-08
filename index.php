@@ -82,11 +82,11 @@
     );
     die();
   elseif ($partner_slug === 'info'):
-    header('X-Request-IP: ' . $request_ip);
-    header('Cache-Control: private, no-cache');
     header('Expires: Thu, 01 Jan 1970 00:00:01 GMT');
-    header('X-Imagick-Supported: ' . implode(',', \Imagick::queryformats()));
+    header('Cache-Control: private, no-cache');
     if($request_ip_whitelisted):
+      header('X-Request-IP: ' . $request_ip);
+      header('X-Imagick-Supported: ' . implode(',', \Imagick::queryformats()));
       phpinfo();
     else:
       header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
