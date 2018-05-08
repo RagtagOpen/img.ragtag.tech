@@ -208,6 +208,35 @@
     die();
   endif;
 
+  function autoRotateImage($image) {
+    // from http://php.net/manual/en/imagick.getimageorientation.php#111448
+      $image = new Imagick($image);
+      $orientation = $image->getImageOrientation();
+      $rotated = 0;
+
+      switch($orientation) {
+          case imagick::ORIENTATION_BOTTOMRIGHT:
+              $image->rotateimage("#000", 180); // rotate 180 degrees
+              $rotated = 180;
+          break;
+
+          case imagick::ORIENTATION_RIGHTTOP:
+              $image->rotateimage("#000", 90); // rotate 90 degrees CW
+              $rotated = 90;
+          break;
+
+          case imagick::ORIENTATION_LEFTBOTTOM:
+              $image->rotateimage("#000", -90); // rotate 90 degrees CCW
+              $rotated = -90;
+          break;
+      }
+
+      // Now that it's auto-rotated, make sure the EXIF data is correct in case the EXIF gets saved with the image!
+      $image->setImageOrientation(imagick::ORIENTATION_TOPLEFT);
+
+      return $image;
+  }
+
   $original_extension = pathinfo($image_path, PATHINFO_EXTENSION);
 
   if(in_array($original_extension, array_keys($formats))):
@@ -268,6 +297,7 @@
       }
     );
 
+    $image = autoRotateImage($temp_image);
     header('Content-Type: ' . image_type_to_mime_type($content_type));
 
   elseif ($original_extension === 'svg'):
