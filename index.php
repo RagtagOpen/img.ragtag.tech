@@ -5,6 +5,19 @@
 
   require_once 'vendor/autoload.php';
 
+  if(get($_ENV['SENTRY_DSN']) && class_exists('Sentry')):
+    $sentry_opts = array();
+    $sentry_opts['dsn'] = $_ENV['SENTRY_DSN'];
+    if(get($_ENV['HEROKU_SLUG_COMMIT'])):
+      $sentry_opts['release'] = get($_ENV['HEROKU_SLUG_COMMIT']);
+    endif;
+    if(get($_ENV['SENTRY_ENVIRONMENT'])):
+      $sentry_opts['environment'] = get($_ENV['SENTRY_ENVIRONMENT']);
+    endif;
+    Sentry\init($sentry_opts);
+  endif;
+  
+
   use Gumlet\ImageResize;
   use Spatie\ImageOptimizer\OptimizerChainFactory;
 
@@ -19,18 +32,6 @@
   function get(&$var, $default=null) {
     return isset($var) ? $var : $default;
   }
-
-  if(get($_ENV['SENTRY_DSN']) && class_exists('Raven_Client')):
-    $raven_opts = array();
-    if(get($_ENV['HEROKU_SLUG_COMMIT'])):
-      $raven_opts['release'] = get($_ENV['HEROKU_SLUG_COMMIT']);
-    endif;
-    if(get($_ENV['SENTRY_ENVIRONMENT'])):
-      $raven_opts['environment'] = get($_ENV['SENTRY_ENVIRONMENT']);
-    endif;
-    $client = new Raven_Client(get($_ENV['SENTRY_DSN']), $raven_opts);
-    $client->install();
-  endif;
 
   $request_ip = get($_SERVER['HTTP_X_FORWARDED_FOR'], $_SERVER['REMOTE_ADDR']);
   $request_ip = explode(',', $request_ip);
