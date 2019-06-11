@@ -5,7 +5,14 @@
 
   require_once 'vendor/autoload.php';
 
-  if(get($_ENV['SENTRY_DSN']) && class_exists('Sentry')):
+  try {
+    $dotenv = new Dotenv\Dotenv(__DIR__);
+    $dotenv->load();
+  } catch (\Exception $e) {
+    // if this fails, we're in production
+  }
+
+  if(get($_ENV['SENTRY_DSN'])):
     $sentry_opts = array();
     $sentry_opts['dsn'] = $_ENV['SENTRY_DSN'];
     if(get($_ENV['HEROKU_SLUG_COMMIT'])):
@@ -16,18 +23,9 @@
     endif;
     Sentry\init($sentry_opts);
   endif;
-  
 
   use Gumlet\ImageResize;
   use Spatie\ImageOptimizer\OptimizerChainFactory;
-
-  try {
-    $dotenv = new Dotenv\Dotenv(__DIR__);
-    $dotenv->load();
-  } catch (\Exception $e) {
-    // if this fails, we're in production
-  }
-
 
   function get(&$var, $default=null) {
     return isset($var) ? $var : $default;
